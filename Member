@@ -1,0 +1,488 @@
+package zz;
+
+import java.awt.BorderLayout;   
+import java.awt.Choice;          
+import java.awt.Color;           
+import java.awt.Dimension;        
+import java.awt.GridLayout;      
+import java.awt.FlowLayout;       
+
+import javax.swing.JButton;      
+import javax.swing.JFrame;       
+import javax.swing.JOptionPane;  
+import javax.swing.JLabel;       
+import javax.swing.JPanel;       
+import javax.swing.JScrollPane;  
+import javax.swing.JTable;       
+import javax.swing.JTextField;   
+
+import java.awt.event.ActionEvent;      
+import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;        
+import java.awt.event.ItemListener;
+import java.awt.event.MouseAdapter;     
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.awt.event.WindowEvent;           
+import java.awt.event.WindowAdapter;
+
+import java.io.UnsupportedEncodingException;
+
+import java.sql.Connection;                  
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
+import java.util.Vector;                   
+public class Member extends JFrame implements ActionListener {  	                                                       
+	JLabel l_name, l_attend, l_absent, l_late, l_stuID, l_mid, l_fin, l_quiz, l_pro, l_rep, l_etc;
+	JTextField txt_name, txt_attend, txt_absent, txt_late, txt_stuID, txt_mid, txt_mid2, txt_mid3, txt_fin, txt_fin_stuID, txt_keyword
+	,txt_quiz, txt_pro, txt_rep, txt_etc;
+	Choice ch_fin, ch_category;
+	JTable table;
+	JScrollPane scroll;
+	JButton bt_regist, bt_edit, bt_delete, bt_select, bt_getListAll, bt_exit;
+	JPanel south, north, center, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11;
+	                                                              
+	String driver = "com.mysql.jdbc.Driver";                      
+	String url = "jdbc:mysql://127.0.0.1:3306/student6132";       
+
+	String userid = "root";                                       
+	String passwd = "1234";
+
+	Connection con;
+	PreparedStatement pstmt;
+	ResultSet rs;
+
+	String sql;
+	
+	String category;
+
+	MemberModel model = new MemberModel();                         
+	int selRow;                                                    
+	int idx;                                                       
+
+	public Member() {
+		super("학생 관리 프로그램");
+
+		l_stuID = new JLabel("학     번");
+		l_name = new JLabel("이    름");           
+		l_attend = new JLabel(" 출   석");
+		l_absent = new JLabel("결   석");
+		l_late = new JLabel("지   각");
+		l_mid = new JLabel("중간고사성적");
+		l_fin = new JLabel("기말고사성적");
+		l_quiz = new JLabel("퀴즈 성적");
+		l_pro = new JLabel("과제 성적");
+		l_rep = new JLabel("레포트 성적");
+		l_etc = new JLabel("기타 성적");
+		
+		txt_name = new JTextField(5);              
+		txt_attend = new JTextField(2);
+		txt_absent = new JTextField(2);
+		txt_late = new JTextField(2);
+		txt_stuID = new JTextField(8);
+		txt_mid = new JTextField(3);
+		txt_fin = new JTextField(3);
+		txt_keyword = new JTextField(6);
+		txt_quiz = new JTextField(3);
+		txt_pro = new JTextField(3);
+		txt_rep = new JTextField(3);
+		txt_etc = new JTextField(3);
+		
+		ch_category=new Choice();
+		ch_category.add("검색 카테고리 선택");     
+		ch_category.add("이름");
+		ch_category.add("학번");
+		
+		bt_regist = new JButton("등록");                   
+		bt_edit = new JButton("수정");
+		bt_delete = new JButton("삭제");
+		bt_select = new JButton("검색");
+		bt_getListAll = new JButton("전체");
+		bt_exit = new JButton("종료");
+
+		table = new JTable(model);
+		scroll = new JScrollPane(table);
+
+		north = new JPanel();                            
+		center = new JPanel();
+		south = new JPanel();
+		
+		p2 = new JPanel();                                
+		p3 = new JPanel();
+		p4 = new JPanel();
+		p5 = new JPanel();
+		p6 = new JPanel();
+		p7 = new JPanel();
+		p8 = new JPanel();
+		p9 = new JPanel();
+		p10 = new JPanel();
+		p11 = new JPanel();
+		
+		north.setPreferredSize(new Dimension(700, 210));      
+		center.setPreferredSize(new Dimension(500, 300));
+		south.setPreferredSize(new Dimension(500, 35));
+
+		add(north, BorderLayout.NORTH);
+		add(center, BorderLayout.CENTER);
+		add(south, BorderLayout.SOUTH);
+		
+		north.setLayout(new GridLayout(6, 1));                
+		north.add(p2);
+		north.add(p3);
+		north.add(p4);
+		north.add(p5);
+		north.add(p6);
+		north.add(p7);
+		north.add(p8);
+		north.add(p9);
+		north.add(p10);
+		
+		p2.setLayout(new FlowLayout(FlowLayout.LEFT));
+		p3.setLayout(new FlowLayout(FlowLayout.LEFT));
+		p4.setLayout(new FlowLayout(FlowLayout.LEFT));
+		p5.setLayout(new FlowLayout(FlowLayout.LEFT));
+		p6.setLayout(new FlowLayout(FlowLayout.LEFT));
+		p7.setLayout(new FlowLayout(FlowLayout.LEFT));
+		p8.setLayout(new FlowLayout(FlowLayout.LEFT));
+		p9.setLayout(new FlowLayout(FlowLayout.LEFT));
+		
+		p2.add(l_name);
+		p2.add(txt_name);
+		p2.add(l_attend);
+		p2.add(txt_attend);
+		p2.add(l_absent);
+		p2.add(txt_absent);
+		p2.add(l_late);
+		p2.add(txt_late);
+		p3.add(l_stuID);
+		p3.add(txt_stuID);
+		p4.add(l_mid);
+		p4.add(txt_mid);
+		p5.add(l_fin);
+		p5.add(txt_fin);
+		p6.add(l_quiz);
+		p6.add(txt_quiz);
+		p7.add(l_pro);
+		p7.add(txt_pro);
+		p8.add(l_rep);
+		p8.add(txt_rep);
+		p9.add(l_etc);
+		p9.add(txt_etc);
+
+
+		
+		p10.add(bt_regist);
+		p10.add(bt_edit);
+		p10.add(bt_delete);
+		p10.add(bt_exit);
+
+		
+
+		center.setLayout(new GridLayout(1, 1));           
+		center.add(scroll);
+		
+		south.setLayout(new GridLayout(1, 1));            
+		south.add(p11);
+
+		p11.setLayout(new FlowLayout(FlowLayout.LEFT));    
+				p11.setBackground(Color.gray);
+				p11.add(ch_category);
+				p11.add(txt_keyword);
+				p11.add(bt_select);
+				p11.add(bt_getListAll);
+				
+			    ch_category.addItemListener(new ItemListener() {
+					public void itemStateChanged(ItemEvent ie) {
+						Object obj = ie.getSource();
+					 	category=(String)ie.getItem();
+					}
+			    });
+//끄아아
+		                                                 
+		bt_regist.addActionListener(this);
+		bt_edit.addActionListener(this);
+		bt_delete.addActionListener(this);
+		bt_select.addActionListener(this);
+		bt_getListAll.addActionListener(this);
+		bt_exit.addActionListener(this);
+
+		table.addMouseListener(new MouseAdapter() {
+			public void mouseClicked(MouseEvent e) {
+				selRow = table.getSelectedRow();
+				System.out.println(selRow);
+
+				String name = (String) table.getValueAt(selRow, 0);
+				String attend = table.getValueAt(selRow, 1).toString();
+				String absent = table.getValueAt(selRow, 2).toString();
+				String late = table.getValueAt(selRow, 3).toString();
+				String stuID = (String) table.getValueAt(selRow, 4);
+				String mid = (String) table.getValueAt(selRow, 5);
+				String fin = (String) table.getValueAt(selRow, 6);
+				String quiz = (String) table.getValueAt(selRow, 6);
+				String pro = (String) table.getValueAt(selRow, 6);
+				String rep = (String) table.getValueAt(selRow, 6);
+				String etc = (String) table.getValueAt(selRow, 6);
+				
+				idx = (Integer) model.getValueAt(selRow, 7);
+				System.out.println(idx);
+
+				txt_name.setText(name);
+				txt_attend.setText(attend);
+				txt_absent.setText(absent);
+				txt_late.setText(late);
+				txt_stuID.setText(stuID);
+				txt_mid.setText(mid);
+				txt_fin.setText(fin);
+				txt_quiz.setText(quiz);
+				txt_pro.setText(pro);
+				txt_rep.setText(rep);
+				txt_etc.setText(etc);
+			}
+		});
+
+		this.addWindowListener(new WindowAdapter() {
+			public void windowClosing(WindowEvent e) {
+//				closeDB();
+				System.exit(0);
+			}
+		}); // end windowListner
+
+		                                                
+//		connect();
+//		getListAll();
+
+		this.setDefaultCloseOperation(EXIT_ON_CLOSE);
+		pack();
+		setVisible(true);
+	}
+	
+//	public boolean connect() {
+//		boolean isConnect = false;
+//		try {			                                      
+//			Class.forName(driver);			                                      
+//			con = DriverManager.getConnection(url, userid, passwd);
+//			isConnect = true;
+//		} catch (ClassNotFoundException | SQLException e) {
+//			e.printStackTrace();
+//		}
+//		return isConnect;
+//	}
+
+//	public void getListAll() {
+//		String sql = "select * from memberr order by idx desc";     
+//		try {
+//			pstmt = con.prepareStatement(sql);
+//			rs = pstmt.executeQuery();
+//			Vector list = new Vector();
+//			while (rs.next()) {
+//				Vector record = new Vector();
+//				record.add(rs.getString("stuID"));	
+//				record.add(rs.getString("name"));
+//				record.add(rs.getInt("attend"));
+//				record.add(rs.getInt("absent"));
+//				record.add(rs.getInt("late"));
+//				record.add(rs.getString("mid"));
+//				record.add(rs.getString("fin"));
+//				record.add(rs.getString("quiz"));
+//				record.add(rs.getString("pro"));
+//				record.add(rs.getString("rep"));
+//				record.add(rs.getString("etc"));
+//				record.add(rs.getInt("idx"));		
+//				list.add(record);
+//			}
+//			model.setList(list);
+//			this.repaint();
+//		} catch (SQLException e) {
+//			e.printStackTrace();
+//		} 
+//	}	
+	
+//	public int regist() {
+//		int result = 0;
+//		sql = "Insert into memberr(name,attend,absent,late,stuID,mid,fin)";
+//		sql = sql + "Value(?,?,?,?,?,?,?)";
+//		try {
+//			pstmt = con.prepareStatement(sql);
+//			pstmt.setString(1, txt_name.getText());
+//			pstmt.setString(1, new String(txt_name.getText().getBytes(), "euc-kr"));
+//			pstmt.setInt(2, Integer.parseInt(txt_attend.getText()));
+//			pstmt.setInt(3, Integer.parseInt(txt_absent.getText()));
+//			pstmt.setInt(4, Integer.parseInt(txt_late.getText()));
+//			pstmt.setString(5, txt_stuID.getText());
+//			pstmt.setString(6, txt_mid.getText()+"-"+ txt_mid2.getText()+"-"+txt_mid3.getText());
+//			pstmt.setString(7,txt_fin.getText()+"@"+txt_fin_stuID.getText());
+//			result = pstmt.executeUpdate();
+//			// System.out.println(new String(txt_stuID.getText().getBytes("euc-kr"),"utf-8"));
+//		} catch (SQLException e) {
+//			e.printStackTrace();
+//		} 
+//		return result;
+//	}
+//
+//	public int delete() {
+//		int result = 0;
+//		String sql = "Delete from memberr where idx=?";
+//
+//		try {
+//			pstmt = con.prepareStatement(sql);
+//			pstmt.setInt(1, idx);
+//			result = pstmt.executeUpdate();
+//		} catch (SQLException e) {
+//			e.printStackTrace();
+//		} 
+//		return result;
+//	}
+	
+//	public int edit(){
+//		int result =0;
+//		String sql = "Update memberr set name=?, attend=?, absent=?, late=?, stuID=?, mid=?, fin=? where idx=?";
+//		try {
+//			pstmt = con.prepareStatement(sql);			
+//			pstmt.setString(1, txt_name.getText());
+//			pstmt.setInt(2, Integer.parseInt(txt_attend.getText()));
+//			pstmt.setInt(3, Integer.parseInt(txt_absent.getText()));
+//			pstmt.setInt(4, Integer.parseInt(txt_late.getText()));
+//			pstmt.setString(5, txt_stuID.getText());
+//			pstmt.setString(6,	txt_mid.getText() + "-" + txt_mid2.getText() +"-"+ txt_mid3.getText());
+//			pstmt.setString(7,	txt_fin.getText() + "@" + txt_fin_stuID.getText());
+//			pstmt.setInt(8, idx);
+//			result = pstmt.executeUpdate();
+//		} catch (SQLException e) {
+//			e.printStackTrace();
+//		}
+//		return result;
+//	}
+	
+//	public boolean select(String category, String keyword){
+//		boolean result = false;
+//		String sql ="select * from memberr where "+category+" like '%"+keyword+"%' order by idx desc";		
+//		System.out.println(sql);
+//		try {
+//			pstmt=con.prepareStatement(sql);
+//			rs = pstmt.executeQuery();			
+//			Vector list = new Vector();
+//			while (rs.next()) {
+//				Vector record = new Vector();
+//				record.add(rs.getString("stuID"));	
+//				record.add(rs.getString("name"));
+//				record.add(rs.getInt("attend"));
+//				record.add(rs.getInt("absent"));
+//				record.add(rs.getInt("late"));
+//				record.add(rs.getString("mid"));
+//				record.add(rs.getString("fin"));
+//				record.add(rs.getString("quiz"));
+//				record.add(rs.getString("pro"));
+//				record.add(rs.getString("rep"));
+//				record.add(rs.getString("etc"));
+//				record.add(rs.getInt("idx"));		
+//				list.add(record);
+//			}
+//			model.setList(list);
+//			this.repaint();
+//			
+//		} catch (SQLException e) {
+//			e.printStackTrace();
+//		}
+//		return result;
+//	}
+
+	public void clear(){	
+		txt_stuID.setText("");
+		txt_name.setText("");
+		txt_attend.setText(""); 
+		txt_absent.setText("");
+		txt_late.setText("");
+		txt_stuID.setText(""); 
+		txt_mid.setText(""); 
+		txt_fin.setText(""); 
+		txt_quiz.setText("");
+		txt_pro.setText("");
+		txt_rep.setText("");
+		txt_etc.setText("");
+		txt_name.requestFocus();
+	}
+	 
+//	public void closeDB() {
+//		if (rs != null)
+//			try {
+//				rs.close();
+//			} catch (SQLException e) {
+//				e.printStackTrace();
+//			}
+//		if (pstmt != null)
+//			try {
+//				pstmt.close();
+//			} catch (SQLException e) {
+//				e.printStackTrace();
+//			}
+//		if (con != null)
+//			try {
+//				con.close();
+//			} catch (SQLException e) {
+//				e.printStackTrace();
+//			}
+//	}
+
+	public void actionPerformed(ActionEvent e) {
+		Object obj = e.getSource();
+		if (obj.equals(bt_regist)) {
+			// 등록메서드 수행~
+			System.out.println("등럭");
+//			int result = regist();
+//			if (result != 0) {
+//				JOptionPane.showMessageDialog(getParent(), "등록성공");
+////				getListAll();
+//				clear();
+//				table.updateUI();
+//			} else {
+//				JOptionPane.showMessageDialog(getParent(), "등록실패");
+//			}
+		}
+
+		if (obj.equals(bt_edit)) {
+			if(JOptionPane.showConfirmDialog(getParent(),	(String)table.getValueAt(selRow, 0)+ "님의 정보를 수정 하시겠습니까?")==0){
+//				int result = edit();
+//				if(result !=0){
+//					getListAll();
+//					clear();
+//					table.updateUI();
+//				}
+			}
+		}
+
+		if (obj.equals(bt_delete)) {
+			if(JOptionPane.showConfirmDialog(getParent(),	(String) table.getValueAt(selRow, 0)+ "님의 정보를 삭제 하시겠습니까?")==0){
+				System.out.println("삭제 완료");
+//				int result = delete();
+//				if (result != 0) {
+//					getListAll();
+//					clear();
+//					table.updateUI();			
+//				}
+			}
+		}
+
+//		if (obj.equals(bt_select)) {
+//			select(category, txt_keyword.getText());
+//		}
+//
+//		if (obj.equals(bt_getListAll)) {
+//			getListAll();
+//		}
+//
+//		if (obj.equals(bt_exit)) {
+//			closeDB();
+//			System.exit(0);
+//
+//		}
+	}
+
+	public static void main(String[] args) {
+		Member m = new Member();
+
+	}
+
+}// end class
